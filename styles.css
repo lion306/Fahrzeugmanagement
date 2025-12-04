@@ -12,6 +12,7 @@
     --success-color: #10b981;
     --danger-color: #ef4444;
     --warning-color: #f59e0b;
+    --info-color: #3b82f6;
     --background: #f8fafc;
     --card-bg: #ffffff;
     --text-primary: #1e293b;
@@ -31,7 +32,7 @@ body {
 }
 
 .container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -67,6 +68,23 @@ section h2 {
     gap: 10px;
 }
 
+/* Formular Section Titles */
+.form-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 24px 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.form-section-title:first-of-type {
+    margin-top: 0;
+}
+
 /* Formular */
 .form-grid {
     display: grid;
@@ -86,15 +104,18 @@ section h2 {
     margin-bottom: 6px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     padding: 12px 14px;
     border: 1px solid var(--border-color);
     border-radius: var(--radius);
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
+    background: white;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
@@ -143,6 +164,7 @@ section h2 {
     padding: 8px 12px;
     font-size: 0.875rem;
     border-radius: 6px;
+    min-width: 36px;
 }
 
 .btn-edit {
@@ -161,6 +183,31 @@ section h2 {
 
 .btn-delete:hover {
     background: #dc2626;
+}
+
+.btn-info {
+    background: var(--info-color);
+    color: white;
+}
+
+.btn-info:hover {
+    background: #2563eb;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.btn-manage {
+    background: var(--secondary-color);
+    color: white;
+    font-size: 0.75rem;
+    padding: 4px 10px;
+}
+
+.btn-manage:hover {
+    background: #475569;
 }
 
 /* Suchleiste */
@@ -234,6 +281,46 @@ tbody tr:hover {
     font-weight: 500;
 }
 
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.status-neu {
+    background: #e2e8f0;
+    color: #475569;
+}
+
+.status-eingekauft {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.status-geliefert {
+    background: #d1fae5;
+    color: #059669;
+}
+
+.status-werkstatt {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-fremdfirma {
+    background: #fce7f3;
+    color: #be185d;
+}
+
+.status-aufbereitung {
+    background: #e0e7ff;
+    color: #4338ca;
+}
+
 /* Empty Message */
 .empty-message {
     text-align: center;
@@ -246,12 +333,186 @@ tbody tr:hover {
     display: block;
 }
 
+.empty-message-small {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 20px;
+    font-size: 0.875rem;
+}
+
 /* Footer */
 footer {
     text-align: center;
     padding: 20px;
     color: var(--text-secondary);
     font-size: 0.875rem;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal.visible {
+    display: flex;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.modal-large {
+    max-width: 800px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    line-height: 1;
+    padding: 4px;
+}
+
+.modal-close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(80vh - 60px);
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Management List (fuer Fremdfirmen/Aufbereiter) */
+.add-item-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.add-item-form input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+}
+
+.add-item-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.management-list {
+    list-style: none;
+}
+
+.management-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    margin-bottom: 8px;
+    background: var(--background);
+}
+
+.management-item span {
+    font-size: 0.9rem;
+}
+
+.management-item .btn-delete {
+    padding: 4px 10px;
+    font-size: 1rem;
+}
+
+/* Detail Grid */
+.detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.detail-section {
+    background: var(--background);
+    padding: 16px;
+    border-radius: var(--radius);
+}
+
+.detail-section h4 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    font-size: 0.875rem;
+}
+
+.detail-row.status-active {
+    background: #fef3c7;
+    margin: 0 -8px;
+    padding: 6px 8px;
+    border-radius: 4px;
+}
+
+.detail-label {
+    color: var(--text-secondary);
+}
+
+.detail-value {
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
 /* Responsive */
@@ -289,6 +550,21 @@ footer {
         flex-direction: column;
         gap: 4px;
     }
+
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-section-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
 }
 
 /* Animation */
@@ -318,7 +594,7 @@ tbody tr {
     font-weight: 500;
     box-shadow: var(--shadow-lg);
     animation: slideIn 0.3s ease-out;
-    z-index: 1000;
+    z-index: 1001;
 }
 
 .toast.success {

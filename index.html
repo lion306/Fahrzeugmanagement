@@ -9,16 +9,18 @@
 <body>
     <div class="container">
         <header>
-            <h1>🚗 Fahrzeugmanagement</h1>
+            <h1>Fahrzeugmanagement</h1>
         </header>
 
         <main>
-            <!-- Formular zum Hinzufügen/Bearbeiten -->
+            <!-- Formular zum Hinzufuegen/Bearbeiten -->
             <section class="form-section">
                 <h2 id="form-title">Neues Fahrzeug anlegen</h2>
                 <form id="vehicle-form">
                     <input type="hidden" id="vehicle-id">
 
+                    <!-- Basis-Informationen -->
+                    <h3 class="form-section-title">Fahrzeugdaten</h3>
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="gw-nr">GW-Nr.</label>
@@ -51,6 +53,82 @@
                         </div>
                     </div>
 
+                    <!-- Einkauf und Lieferung -->
+                    <h3 class="form-section-title">Einkauf & Lieferung</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="einkaufsdatum">Einkaufsdatum</label>
+                            <input type="date" id="einkaufsdatum">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lieferdatum">Lieferdatum</label>
+                            <input type="date" id="lieferdatum">
+                        </div>
+                    </div>
+
+                    <!-- Werkstatt -->
+                    <h3 class="form-section-title">Werkstatt</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="uebergeben-werkstatt">Uebergeben an Werkstatt</label>
+                            <input type="date" id="uebergeben-werkstatt">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zurueck-werkstatt">Zurueck von Werkstatt</label>
+                            <input type="date" id="zurueck-werkstatt">
+                        </div>
+                    </div>
+
+                    <!-- Fremdfirma -->
+                    <h3 class="form-section-title">
+                        Fremdfirma
+                        <button type="button" class="btn btn-small btn-manage" onclick="vehicleManager.openFremdfirmenModal()">Verwalten</button>
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fremdfirma-select">Fremdfirma</label>
+                            <select id="fremdfirma-select">
+                                <option value="">-- Keine Auswahl --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uebergeben-fremdfirma">Uebergeben an Fremdfirma</label>
+                            <input type="date" id="uebergeben-fremdfirma">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zurueck-fremdfirma">Zurueck von Fremdfirma</label>
+                            <input type="date" id="zurueck-fremdfirma">
+                        </div>
+                    </div>
+
+                    <!-- Aufbereitung -->
+                    <h3 class="form-section-title">
+                        Aufbereitung
+                        <button type="button" class="btn btn-small btn-manage" onclick="vehicleManager.openAufbereiterModal()">Verwalten</button>
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="aufbereiter-select">Aufbereiter</label>
+                            <select id="aufbereiter-select">
+                                <option value="">-- Keine Auswahl --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uebergeben-aufbereitung">Uebergeben Aufbereitung</label>
+                            <input type="date" id="uebergeben-aufbereitung">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zurueck-aufbereiter">Zurueck Aufbereiter</label>
+                            <input type="date" id="zurueck-aufbereiter">
+                        </div>
+                    </div>
+
                     <div class="form-actions">
                         <button type="submit" class="btn btn-primary" id="submit-btn">Fahrzeug speichern</button>
                         <button type="button" class="btn btn-secondary" id="cancel-btn" style="display: none;">Abbrechen</button>
@@ -76,11 +154,12 @@
                                 <th>Modell</th>
                                 <th>Herkunft</th>
                                 <th>WA-Nr.</th>
+                                <th>Status</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
                         <tbody id="vehicle-list">
-                            <!-- Fahrzeuge werden hier dynamisch eingefügt -->
+                            <!-- Fahrzeuge werden hier dynamisch eingefuegt -->
                         </tbody>
                     </table>
                 </div>
@@ -91,6 +170,59 @@
         <footer>
             <p>&copy; 2024 Fahrzeugmanagement</p>
         </footer>
+    </div>
+
+    <!-- Modal fuer Fremdfirmen-Verwaltung -->
+    <div id="fremdfirmen-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Fremdfirmen verwalten</h3>
+                <button class="modal-close" onclick="vehicleManager.closeFremdfirmenModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-item-form">
+                    <input type="text" id="new-fremdfirma-input" placeholder="Neue Fremdfirma eingeben...">
+                    <button class="btn btn-primary btn-small" onclick="vehicleManager.addFremdfirma()">Hinzufuegen</button>
+                </div>
+                <ul id="fremdfirmen-list" class="management-list">
+                    <!-- Fremdfirmen werden hier dynamisch eingefuegt -->
+                </ul>
+                <p id="no-fremdfirmen" class="empty-message-small">Keine Fremdfirmen vorhanden.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal fuer Aufbereiter-Verwaltung -->
+    <div id="aufbereiter-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Aufbereiter verwalten</h3>
+                <button class="modal-close" onclick="vehicleManager.closeAufbereiterModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="add-item-form">
+                    <input type="text" id="new-aufbereiter-input" placeholder="Neuen Aufbereiter eingeben...">
+                    <button class="btn btn-primary btn-small" onclick="vehicleManager.addAufbereiter()">Hinzufuegen</button>
+                </div>
+                <ul id="aufbereiter-list" class="management-list">
+                    <!-- Aufbereiter werden hier dynamisch eingefuegt -->
+                </ul>
+                <p id="no-aufbereiter" class="empty-message-small">Keine Aufbereiter vorhanden.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail-Modal fuer Fahrzeug-Tracking -->
+    <div id="detail-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="detail-modal-title">Fahrzeug-Details</h3>
+                <button class="modal-close" onclick="vehicleManager.closeDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="detail-modal-body">
+                <!-- Details werden hier dynamisch eingefuegt -->
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
