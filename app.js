@@ -4,6 +4,13 @@
 class SettingsManager {
     constructor() {
         this.categories = ['fremdfirmen', 'aufbereiter', 'hersteller', 'herkunft'];
+        // Mapping von Plural zu Singular für Input-IDs
+        this.singularMap = {
+            'fremdfirmen': 'fremdfirma',
+            'aufbereiter': 'aufbereiter',
+            'hersteller': 'hersteller',
+            'herkunft': 'herkunft'
+        };
         this.settings = this.loadSettings();
         this.init();
     }
@@ -40,7 +47,7 @@ class SettingsManager {
 
         // Enter-Taste für Inputs
         this.categories.forEach(category => {
-            const input = document.getElementById(`new-${category.slice(0, -1)}`);
+            const input = document.getElementById(`new-${this.singularMap[category]}`);
             if (input) {
                 input.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
@@ -106,7 +113,7 @@ class SettingsManager {
 
     // Neues Element hinzufügen
     addItem(category) {
-        const inputId = `new-${category.slice(0, -1)}`;
+        const inputId = `new-${this.singularMap[category]}`;
         const input = document.getElementById(inputId);
         const value = input.value.trim();
 
