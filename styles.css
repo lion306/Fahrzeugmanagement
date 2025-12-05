@@ -561,6 +561,119 @@ header {
     font-style: italic;
 }
 
+/* Large Modal */
+.modal-large {
+    max-width: 900px;
+}
+
+/* Vehicle Info Header */
+.vehicle-info-header {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    padding: 15px 20px;
+    background: var(--background);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+}
+
+.vehicle-info-header .info-item {
+    font-size: 0.95rem;
+}
+
+.vehicle-info-header .info-item strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Tracking Grid */
+.tracking-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tracking-section {
+    background: var(--background);
+    border-radius: var(--radius);
+    padding: 20px;
+}
+
+.tracking-section h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.tracking-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.tracking-row:last-child {
+    margin-bottom: 0;
+}
+
+#tracking-form h3 {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+#tracking-form .form-actions {
+    margin-top: 25px;
+}
+
+/* Status Badge */
+.status-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.status-badge.status-neu {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-badge.status-werkstatt {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.status-fremdfirma {
+    background: #fce7f3;
+    color: #9d174d;
+}
+
+.status-badge.status-aufbereitung {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-badge.status-fertig {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+/* Detail Button */
+.btn-detail {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-detail:hover {
+    background: var(--primary-hover);
+}
+
 /* Responsive Modal */
 @media (max-width: 768px) {
     .modal-content {
@@ -587,5 +700,17 @@ header {
     header {
         text-align: center;
         justify-content: center;
+    }
+
+    .modal-large {
+        max-width: 100%;
+    }
+
+    .vehicle-info-header {
+        grid-template-columns: 1fr;
+    }
+
+    .tracking-row {
+        grid-template-columns: 1fr;
     }
 }

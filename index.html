@@ -56,17 +56,8 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="fremdfirma">Fremdfirma</label>
-                            <select id="fremdfirma">
-                                <option value="">-- Keine --</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="aufbereiter">Aufbereiter</label>
-                            <select id="aufbereiter">
-                                <option value="">-- Keine --</option>
-                            </select>
+                            <label for="einkaufsdatum">Einkaufsdatum</label>
+                            <input type="date" id="einkaufsdatum" required>
                         </div>
                     </div>
 
@@ -95,8 +86,8 @@
                                 <th>Modell</th>
                                 <th>Herkunft</th>
                                 <th>WA-Nr.</th>
-                                <th>Fremdfirma</th>
-                                <th>Aufbereiter</th>
+                                <th>Einkaufsdatum</th>
+                                <th>Status</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
@@ -112,6 +103,115 @@
         <footer>
             <p>&copy; 2024 Fahrzeugmanagement</p>
         </footer>
+    </div>
+
+    <!-- Fahrzeug-Detail Modal für Tracking -->
+    <div id="vehicle-detail-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📋 Fahrzeug-Details & Tracking</h2>
+                <button class="modal-close" id="detail-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Fahrzeug-Info -->
+                <div class="vehicle-info-header">
+                    <div class="info-item"><strong>GW-Nr.:</strong> <span id="detail-gw-nr"></span></div>
+                    <div class="info-item"><strong>Hersteller:</strong> <span id="detail-hersteller"></span></div>
+                    <div class="info-item"><strong>Modell:</strong> <span id="detail-modell"></span></div>
+                    <div class="info-item"><strong>Fahrgestellnr.:</strong> <span id="detail-fahrgestellnummer"></span></div>
+                </div>
+
+                <input type="hidden" id="detail-vehicle-id">
+
+                <!-- Tracking-Formular -->
+                <form id="tracking-form">
+                    <h3>Termine & Tracking</h3>
+
+                    <div class="tracking-grid">
+                        <!-- Einkauf & Lieferung -->
+                        <div class="tracking-section">
+                            <h4>Einkauf & Lieferung</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-einkaufsdatum">Einkaufsdatum</label>
+                                    <input type="date" id="detail-einkaufsdatum">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-lieferdatum">Lieferdatum</label>
+                                    <input type="date" id="detail-lieferdatum">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Werkstatt -->
+                        <div class="tracking-section">
+                            <h4>Werkstatt</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-werkstatt-uebergabe">Übergeben an Werkstatt</label>
+                                    <input type="date" id="detail-werkstatt-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-werkstatt-zurueck">Zurück von Werkstatt</label>
+                                    <input type="date" id="detail-werkstatt-zurueck">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fremdfirma -->
+                        <div class="tracking-section">
+                            <h4>Fremdfirma</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma">Fremdfirma</label>
+                                    <select id="detail-fremdfirma">
+                                        <option value="">-- Keine --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma-uebergabe">Übergeben an Fremdfirma</label>
+                                    <input type="date" id="detail-fremdfirma-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma-zurueck">Zurück von Fremdfirma</label>
+                                    <input type="date" id="detail-fremdfirma-zurueck">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aufbereitung -->
+                        <div class="tracking-section">
+                            <h4>Aufbereitung</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-aufbereiter">Aufbereiter</label>
+                                    <select id="detail-aufbereiter">
+                                        <option value="">-- Keine --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-aufbereitung-uebergabe">Übergeben an Aufbereitung</label>
+                                    <input type="date" id="detail-aufbereitung-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-aufbereitung-zurueck">Zurück von Aufbereitung</label>
+                                    <input type="date" id="detail-aufbereitung-zurueck">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Tracking speichern</button>
+                        <button type="button" class="btn btn-secondary" id="detail-cancel">Schließen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- Einstellungen Modal -->

@@ -219,6 +219,7 @@ class VehicleManager {
 
     // DOM-Elemente binden
     bindElements() {
+        // Hauptformular
         this.form = document.getElementById('vehicle-form');
         this.vehicleIdInput = document.getElementById('vehicle-id');
         this.gwNrInput = document.getElementById('gw-nr');
@@ -227,8 +228,7 @@ class VehicleManager {
         this.modellInput = document.getElementById('modell');
         this.herkunftSelect = document.getElementById('herkunft');
         this.waNrInput = document.getElementById('wa-nr');
-        this.fremdfirmaSelect = document.getElementById('fremdfirma');
-        this.aufbereiterSelect = document.getElementById('aufbereiter');
+        this.einkaufsdatumInput = document.getElementById('einkaufsdatum');
         this.vehicleList = document.getElementById('vehicle-list');
         this.vehicleTable = document.getElementById('vehicle-table');
         this.noVehiclesMsg = document.getElementById('no-vehicles');
@@ -237,25 +237,69 @@ class VehicleManager {
         this.formTitle = document.getElementById('form-title');
         this.submitBtn = document.getElementById('submit-btn');
         this.cancelBtn = document.getElementById('cancel-btn');
+
+        // Detail-Modal
+        this.detailModal = document.getElementById('vehicle-detail-modal');
+        this.detailCloseBtn = document.getElementById('detail-close');
+        this.detailCancelBtn = document.getElementById('detail-cancel');
+        this.trackingForm = document.getElementById('tracking-form');
+        this.detailVehicleId = document.getElementById('detail-vehicle-id');
+
+        // Detail-Info Anzeige
+        this.detailGwNr = document.getElementById('detail-gw-nr');
+        this.detailHersteller = document.getElementById('detail-hersteller');
+        this.detailModell = document.getElementById('detail-modell');
+        this.detailFahrgestellnummer = document.getElementById('detail-fahrgestellnummer');
+
+        // Tracking-Felder
+        this.detailEinkaufsdatum = document.getElementById('detail-einkaufsdatum');
+        this.detailLieferdatum = document.getElementById('detail-lieferdatum');
+        this.detailWerkstattUebergabe = document.getElementById('detail-werkstatt-uebergabe');
+        this.detailWerkstattZurueck = document.getElementById('detail-werkstatt-zurueck');
+        this.detailFremdfirma = document.getElementById('detail-fremdfirma');
+        this.detailFremdfirmaUebergabe = document.getElementById('detail-fremdfirma-uebergabe');
+        this.detailFremdfirmaZurueck = document.getElementById('detail-fremdfirma-zurueck');
+        this.detailAufbereiter = document.getElementById('detail-aufbereiter');
+        this.detailAufbereitungUebergabe = document.getElementById('detail-aufbereitung-uebergabe');
+        this.detailAufbereitungZurueck = document.getElementById('detail-aufbereitung-zurueck');
     }
 
     // Event-Listener binden
     bindEvents() {
+        // Hauptformular
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         this.cancelBtn.addEventListener('click', () => this.cancelEdit());
         this.searchInput.addEventListener('input', (e) => this.handleSearch(e.target.value));
+
+        // Detail-Modal
+        this.detailCloseBtn.addEventListener('click', () => this.closeDetailModal());
+        this.detailCancelBtn.addEventListener('click', () => this.closeDetailModal());
+        this.detailModal.addEventListener('click', (e) => {
+            if (e.target === this.detailModal) this.closeDetailModal();
+        });
+        this.trackingForm.addEventListener('submit', (e) => this.handleTrackingSubmit(e));
+
+        // Escape-Taste zum Schließen
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.detailModal.classList.contains('active')) {
+                this.closeDetailModal();
+            }
+        });
     }
 
     // Dropdowns aktualisieren
     updateDropdowns() {
-        this.populateSelect(this.herstellerSelect, settingsManager.getItems('hersteller'), '-- Bitte wählen --', true);
-        this.populateSelect(this.herkunftSelect, settingsManager.getItems('herkunft'), '-- Bitte wählen --', true);
-        this.populateSelect(this.fremdfirmaSelect, settingsManager.getItems('fremdfirmen'), '-- Keine --', false);
-        this.populateSelect(this.aufbereiterSelect, settingsManager.getItems('aufbereiter'), '-- Keine --', false);
+        // Hauptformular
+        this.populateSelect(this.herstellerSelect, settingsManager.getItems('hersteller'), '-- Bitte wählen --');
+        this.populateSelect(this.herkunftSelect, settingsManager.getItems('herkunft'), '-- Bitte wählen --');
+
+        // Detail-Modal
+        this.populateSelect(this.detailFremdfirma, settingsManager.getItems('fremdfirmen'), '-- Keine --');
+        this.populateSelect(this.detailAufbereiter, settingsManager.getItems('aufbereiter'), '-- Keine --');
     }
 
     // Select-Element befüllen
-    populateSelect(selectElement, items, defaultText, required) {
+    populateSelect(selectElement, items, defaultText) {
         const currentValue = selectElement.value;
         selectElement.innerHTML = `<option value="">${defaultText}</option>`;
 
@@ -288,7 +332,36 @@ class VehicleManager {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 
-    // Formular absenden
+    // Datum formatieren für Anzeige
+    formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('de-DE');
+    }
+
+    // Status berechnen
+    getStatus(vehicle) {
+        // Prüfen ob alle Phasen abgeschlossen
+        const werkstattFertig = vehicle.werkstattZurueck;
+        const fremdfirmaFertig = !vehicle.fremdfirmaUebergabe || vehicle.fremdfirmaZurueck;
+        const aufbereitungFertig = !vehicle.aufbereitungUebergabe || vehicle.aufbereitungZurueck;
+
+        if (vehicle.aufbereitungUebergabe && !vehicle.aufbereitungZurueck) {
+            return { text: 'Aufbereitung', class: 'status-aufbereitung' };
+        }
+        if (vehicle.fremdfirmaUebergabe && !vehicle.fremdfirmaZurueck) {
+            return { text: 'Fremdfirma', class: 'status-fremdfirma' };
+        }
+        if (vehicle.werkstattUebergabe && !vehicle.werkstattZurueck) {
+            return { text: 'Werkstatt', class: 'status-werkstatt' };
+        }
+        if (werkstattFertig && fremdfirmaFertig && aufbereitungFertig && vehicle.lieferdatum) {
+            return { text: 'Fertig', class: 'status-fertig' };
+        }
+        return { text: 'Neu', class: 'status-neu' };
+    }
+
+    // Formular absenden (Hauptformular)
     handleSubmit(e) {
         e.preventDefault();
 
@@ -299,12 +372,11 @@ class VehicleManager {
             modell: this.modellInput.value.trim(),
             herkunft: this.herkunftSelect.value,
             waNr: this.waNrInput.value.trim(),
-            fremdfirma: this.fremdfirmaSelect.value,
-            aufbereiter: this.aufbereiterSelect.value
+            einkaufsdatum: this.einkaufsdatumInput.value
         };
 
         if (this.editingId) {
-            // Fahrzeug aktualisieren
+            // Fahrzeug aktualisieren (nur Basisdaten)
             this.updateVehicle(this.editingId, vehicleData);
             this.showToast('Fahrzeug erfolgreich aktualisiert', 'success');
         } else {
@@ -314,6 +386,30 @@ class VehicleManager {
         }
 
         this.resetForm();
+        this.render();
+    }
+
+    // Tracking-Formular absenden
+    handleTrackingSubmit(e) {
+        e.preventDefault();
+
+        const vehicleId = this.detailVehicleId.value;
+        const trackingData = {
+            einkaufsdatum: this.detailEinkaufsdatum.value,
+            lieferdatum: this.detailLieferdatum.value,
+            werkstattUebergabe: this.detailWerkstattUebergabe.value,
+            werkstattZurueck: this.detailWerkstattZurueck.value,
+            fremdfirma: this.detailFremdfirma.value,
+            fremdfirmaUebergabe: this.detailFremdfirmaUebergabe.value,
+            fremdfirmaZurueck: this.detailFremdfirmaZurueck.value,
+            aufbereiter: this.detailAufbereiter.value,
+            aufbereitungUebergabe: this.detailAufbereitungUebergabe.value,
+            aufbereitungZurueck: this.detailAufbereitungZurueck.value
+        };
+
+        this.updateVehicle(vehicleId, trackingData);
+        this.showToast('Tracking-Daten erfolgreich gespeichert', 'success');
+        this.closeDetailModal();
         this.render();
     }
 
@@ -351,19 +447,18 @@ class VehicleManager {
         }
     }
 
-    // Fahrzeug bearbeiten
+    // Fahrzeug bearbeiten (Hauptformular)
     editVehicle(id) {
         const vehicle = this.vehicles.find(v => v.id === id);
         if (vehicle) {
             this.editingId = id;
-            this.gwNrInput.value = vehicle.gwNr;
-            this.fahrgestellnummerInput.value = vehicle.fahrgestellnummer;
+            this.gwNrInput.value = vehicle.gwNr || '';
+            this.fahrgestellnummerInput.value = vehicle.fahrgestellnummer || '';
             this.herstellerSelect.value = vehicle.hersteller || '';
-            this.modellInput.value = vehicle.modell;
+            this.modellInput.value = vehicle.modell || '';
             this.herkunftSelect.value = vehicle.herkunft || '';
-            this.waNrInput.value = vehicle.waNr;
-            this.fremdfirmaSelect.value = vehicle.fremdfirma || '';
-            this.aufbereiterSelect.value = vehicle.aufbereiter || '';
+            this.waNrInput.value = vehicle.waNr || '';
+            this.einkaufsdatumInput.value = vehicle.einkaufsdatum || '';
 
             this.formTitle.textContent = 'Fahrzeug bearbeiten';
             this.submitBtn.textContent = 'Änderungen speichern';
@@ -372,6 +467,46 @@ class VehicleManager {
             // Zum Formular scrollen
             this.form.scrollIntoView({ behavior: 'smooth' });
         }
+    }
+
+    // Fahrzeug-Details öffnen (Tracking Modal)
+    openVehicleDetails(id) {
+        const vehicle = this.vehicles.find(v => v.id === id);
+        if (!vehicle) return;
+
+        // Dropdowns aktualisieren
+        this.updateDropdowns();
+
+        // Info-Header befüllen
+        this.detailGwNr.textContent = vehicle.gwNr || '-';
+        this.detailHersteller.textContent = vehicle.hersteller || '-';
+        this.detailModell.textContent = vehicle.modell || '-';
+        this.detailFahrgestellnummer.textContent = vehicle.fahrgestellnummer || '-';
+
+        // Hidden ID
+        this.detailVehicleId.value = vehicle.id;
+
+        // Tracking-Felder befüllen
+        this.detailEinkaufsdatum.value = vehicle.einkaufsdatum || '';
+        this.detailLieferdatum.value = vehicle.lieferdatum || '';
+        this.detailWerkstattUebergabe.value = vehicle.werkstattUebergabe || '';
+        this.detailWerkstattZurueck.value = vehicle.werkstattZurueck || '';
+        this.detailFremdfirma.value = vehicle.fremdfirma || '';
+        this.detailFremdfirmaUebergabe.value = vehicle.fremdfirmaUebergabe || '';
+        this.detailFremdfirmaZurueck.value = vehicle.fremdfirmaZurueck || '';
+        this.detailAufbereiter.value = vehicle.aufbereiter || '';
+        this.detailAufbereitungUebergabe.value = vehicle.aufbereitungUebergabe || '';
+        this.detailAufbereitungZurueck.value = vehicle.aufbereitungZurueck || '';
+
+        // Modal öffnen
+        this.detailModal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    // Detail-Modal schließen
+    closeDetailModal() {
+        this.detailModal.classList.remove('active');
+        document.body.style.overflow = '';
     }
 
     // Bearbeitung abbrechen
@@ -424,26 +559,32 @@ class VehicleManager {
         }
 
         // Tabelleninhalt generieren
-        this.vehicleList.innerHTML = filteredVehicles.map(vehicle => `
-            <tr>
-                <td>${this.escapeHtml(vehicle.gwNr || '')}</td>
-                <td>${this.escapeHtml(vehicle.fahrgestellnummer || '')}</td>
-                <td>${this.escapeHtml(vehicle.hersteller || '')}</td>
-                <td>${this.escapeHtml(vehicle.modell || '')}</td>
-                <td>${this.escapeHtml(vehicle.herkunft || '')}</td>
-                <td>${this.escapeHtml(vehicle.waNr || '')}</td>
-                <td>${this.escapeHtml(vehicle.fremdfirma || '-')}</td>
-                <td>${this.escapeHtml(vehicle.aufbereiter || '-')}</td>
-                <td class="actions-cell">
-                    <button class="btn btn-icon btn-edit" onclick="vehicleManager.editVehicle('${vehicle.id}')" title="Bearbeiten">
-                        ✏️
-                    </button>
-                    <button class="btn btn-icon btn-delete" onclick="vehicleManager.deleteVehicle('${vehicle.id}')" title="Löschen">
-                        🗑️
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        this.vehicleList.innerHTML = filteredVehicles.map(vehicle => {
+            const status = this.getStatus(vehicle);
+            return `
+                <tr>
+                    <td>${this.escapeHtml(vehicle.gwNr || '')}</td>
+                    <td>${this.escapeHtml(vehicle.fahrgestellnummer || '')}</td>
+                    <td>${this.escapeHtml(vehicle.hersteller || '')}</td>
+                    <td>${this.escapeHtml(vehicle.modell || '')}</td>
+                    <td>${this.escapeHtml(vehicle.herkunft || '')}</td>
+                    <td>${this.escapeHtml(vehicle.waNr || '')}</td>
+                    <td>${this.formatDate(vehicle.einkaufsdatum)}</td>
+                    <td><span class="status-badge ${status.class}">${status.text}</span></td>
+                    <td class="actions-cell">
+                        <button class="btn btn-icon btn-detail" onclick="vehicleManager.openVehicleDetails('${vehicle.id}')" title="Details & Tracking">
+                            📋
+                        </button>
+                        <button class="btn btn-icon btn-edit" onclick="vehicleManager.editVehicle('${vehicle.id}')" title="Bearbeiten">
+                            ✏️
+                        </button>
+                        <button class="btn btn-icon btn-delete" onclick="vehicleManager.deleteVehicle('${vehicle.id}')" title="Löschen">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
 
     // HTML escapen (Sicherheit)
