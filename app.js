@@ -763,13 +763,13 @@ class VehicleManager {
                     <td>${this.formatDate(vehicle.einkaufsdatum)}</td>
                     <td><span class="status-badge ${status.class}">${status.text}</span></td>
                     <td class="actions-cell">
-                        <button class="btn btn-icon btn-detail" onclick="vehicleManager.openVehicleDetails('${vehicle.id}')" title="Details & Tracking">
+                        <button type="button" class="btn btn-icon btn-detail" onclick="vehicleManager.openVehicleDetails('${vehicle.id}')" title="Details & Tracking">
                             📋
                         </button>
-                        <button class="btn btn-icon btn-edit" onclick="vehicleManager.editVehicle('${vehicle.id}')" title="Bearbeiten">
+                        <button type="button" class="btn btn-icon btn-edit" onclick="vehicleManager.editVehicle('${vehicle.id}')" title="Bearbeiten">
                             ✏️
                         </button>
-                        <button class="btn btn-icon btn-delete" onclick="vehicleManager.deleteVehicle('${vehicle.id}')" title="Löschen">
+                        <button type="button" class="btn btn-icon btn-delete" onclick="vehicleManager.deleteVehicle('${vehicle.id}')" title="Löschen">
                             🗑️
                         </button>
                     </td>
