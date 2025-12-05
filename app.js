@@ -12,6 +12,7 @@ class SettingsManager {
             'herkunft': 'herkunft'
         };
         this.settings = this.loadSettings();
+        this.eskalation = this.loadEskalation();
         this.init();
     }
 
@@ -20,6 +21,7 @@ class SettingsManager {
         this.bindElements();
         this.bindEvents();
         this.renderAllLists();
+        this.loadEskalationForm();
     }
 
     // DOM-Elemente binden
@@ -29,6 +31,7 @@ class SettingsManager {
         this.closeBtn = document.getElementById('settings-close');
         this.tabBtns = document.querySelectorAll('.tab-btn');
         this.tabPanes = document.querySelectorAll('.tab-pane');
+        this.eskalationForm = document.getElementById('eskalation-form');
     }
 
     // Event-Listener binden
@@ -58,6 +61,9 @@ class SettingsManager {
             }
         });
 
+        // Eskalation-Formular
+        this.eskalationForm.addEventListener('submit', (e) => this.handleEskalationSubmit(e));
+
         // Escape-Taste zum Schließen
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.modal.classList.contains('active')) {
@@ -75,6 +81,52 @@ class SettingsManager {
             hersteller: [],
             herkunft: []
         };
+    }
+
+    // Eskalationsstufen aus LocalStorage laden
+    loadEskalation() {
+        const data = localStorage.getItem('eskalation');
+        return data ? JSON.parse(data) : {
+            lieferung: 14,
+            werkstatt: 5,
+            fremdfirma: 7,
+            aufbereitung: 3
+        };
+    }
+
+    // Eskalationsstufen in LocalStorage speichern
+    saveEskalation() {
+        localStorage.setItem('eskalation', JSON.stringify(this.eskalation));
+        // Dashboard aktualisieren
+        if (typeof dashboardManager !== 'undefined') {
+            dashboardManager.render();
+        }
+    }
+
+    // Eskalation-Formular laden
+    loadEskalationForm() {
+        document.getElementById('esk-lieferung').value = this.eskalation.lieferung;
+        document.getElementById('esk-werkstatt').value = this.eskalation.werkstatt;
+        document.getElementById('esk-fremdfirma').value = this.eskalation.fremdfirma;
+        document.getElementById('esk-aufbereitung').value = this.eskalation.aufbereitung;
+    }
+
+    // Eskalation-Formular absenden
+    handleEskalationSubmit(e) {
+        e.preventDefault();
+        this.eskalation = {
+            lieferung: parseInt(document.getElementById('esk-lieferung').value) || 14,
+            werkstatt: parseInt(document.getElementById('esk-werkstatt').value) || 5,
+            fremdfirma: parseInt(document.getElementById('esk-fremdfirma').value) || 7,
+            aufbereitung: parseInt(document.getElementById('esk-aufbereitung').value) || 3
+        };
+        this.saveEskalation();
+        this.showToast('Eskalationsstufen erfolgreich gespeichert', 'success');
+    }
+
+    // Eskalationswerte abrufen
+    getEskalation() {
+        return this.eskalation;
     }
 
     // Einstellungen in LocalStorage speichern
@@ -198,6 +250,145 @@ class SettingsManager {
         setTimeout(() => {
             toast.remove();
         }, 3000);
+    }
+}
+
+// ===== DASHBOARD MANAGER =====
+class DashboardManager {
+    constructor() {
+        this.dashboardGrid = document.getElementById('dashboard-grid');
+        this.noEscalations = document.getElementById('no-escalations');
+    }
+
+    // Tage seit einem Datum berechnen
+    daysSince(dateString) {
+        if (!dateString) return null;
+        const date = new Date(dateString);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        date.setHours(0, 0, 0, 0);
+        const diffTime = today - date;
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    // Überfällige Fahrzeuge berechnen
+    getOverdueVehicles() {
+        const eskalation = settingsManager.getEskalation();
+        const vehicles = vehicleManager.vehicles;
+
+        const overdue = {
+            lieferung: [],
+            werkstatt: [],
+            fremdfirma: [],
+            aufbereitung: []
+        };
+
+        vehicles.forEach(vehicle => {
+            // Lieferung überfällig: Einkaufsdatum gesetzt, aber noch nicht geliefert
+            if (vehicle.einkaufsdatum && !vehicle.lieferdatum) {
+                const days = this.daysSince(vehicle.einkaufsdatum);
+                if (days >= eskalation.lieferung) {
+                    overdue.lieferung.push({ ...vehicle, daysOverdue: days });
+                }
+            }
+
+            // Werkstatt überfällig: Übergeben aber noch nicht zurück
+            if (vehicle.werkstattUebergabe && !vehicle.werkstattZurueck) {
+                const days = this.daysSince(vehicle.werkstattUebergabe);
+                if (days >= eskalation.werkstatt) {
+                    overdue.werkstatt.push({ ...vehicle, daysOverdue: days });
+                }
+            }
+
+            // Fremdfirma überfällig
+            if (vehicle.fremdfirmaUebergabe && !vehicle.fremdfirmaZurueck) {
+                const days = this.daysSince(vehicle.fremdfirmaUebergabe);
+                if (days >= eskalation.fremdfirma) {
+                    overdue.fremdfirma.push({ ...vehicle, daysOverdue: days });
+                }
+            }
+
+            // Aufbereitung überfällig
+            if (vehicle.aufbereitungUebergabe && !vehicle.aufbereitungZurueck) {
+                const days = this.daysSince(vehicle.aufbereitungUebergabe);
+                if (days >= eskalation.aufbereitung) {
+                    overdue.aufbereitung.push({ ...vehicle, daysOverdue: days });
+                }
+            }
+        });
+
+        // Nach Tagen sortieren (höchste zuerst)
+        Object.keys(overdue).forEach(key => {
+            overdue[key].sort((a, b) => b.daysOverdue - a.daysOverdue);
+        });
+
+        return overdue;
+    }
+
+    // Dashboard rendern
+    render() {
+        const overdue = this.getOverdueVehicles();
+        const eskalation = settingsManager.getEskalation();
+
+        const categories = [
+            { key: 'lieferung', title: 'Lieferung überfällig', threshold: eskalation.lieferung },
+            { key: 'werkstatt', title: 'Werkstatt überfällig', threshold: eskalation.werkstatt },
+            { key: 'fremdfirma', title: 'Fremdfirma überfällig', threshold: eskalation.fremdfirma },
+            { key: 'aufbereitung', title: 'Aufbereitung überfällig', threshold: eskalation.aufbereitung }
+        ];
+
+        // Prüfen ob es überfällige Fahrzeuge gibt
+        const totalOverdue = Object.values(overdue).reduce((sum, arr) => sum + arr.length, 0);
+
+        if (totalOverdue === 0) {
+            this.dashboardGrid.innerHTML = '';
+            this.dashboardGrid.style.display = 'none';
+            this.noEscalations.classList.add('visible');
+            return;
+        }
+
+        this.dashboardGrid.style.display = 'grid';
+        this.noEscalations.classList.remove('visible');
+
+        // Nur Kategorien mit überfälligen Fahrzeugen anzeigen
+        const cardsHtml = categories
+            .filter(cat => overdue[cat.key].length > 0)
+            .map(cat => this.renderCard(cat.key, cat.title, overdue[cat.key], cat.threshold))
+            .join('');
+
+        this.dashboardGrid.innerHTML = cardsHtml;
+    }
+
+    // Einzelne Karte rendern
+    renderCard(key, title, vehicles, threshold) {
+        const vehiclesList = vehicles.map(v => `
+            <li onclick="vehicleManager.openVehicleDetails('${v.id}')">
+                <div class="dashboard-vehicle-info">
+                    <span class="gw-nr">${this.escapeHtml(v.gwNr || '-')}</span>
+                    <span class="vehicle-name">${this.escapeHtml(v.hersteller || '')} ${this.escapeHtml(v.modell || '')}</span>
+                </div>
+                <span class="dashboard-days-overdue">${v.daysOverdue} Tage</span>
+            </li>
+        `).join('');
+
+        return `
+            <div class="dashboard-card card-${key}">
+                <div class="dashboard-card-header">
+                    <h3>${title}</h3>
+                    <span class="dashboard-card-count">${vehicles.length}</span>
+                </div>
+                <ul class="dashboard-card-list">
+                    ${vehiclesList}
+                </ul>
+            </div>
+        `;
+    }
+
+    // HTML escapen
+    escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 }
 
@@ -585,6 +776,11 @@ class VehicleManager {
                 </tr>
             `;
         }).join('');
+
+        // Dashboard aktualisieren
+        if (typeof dashboardManager !== 'undefined') {
+            dashboardManager.render();
+        }
     }
 
     // HTML escapen (Sicherheit)
@@ -608,6 +804,10 @@ class VehicleManager {
 }
 
 // ===== APP STARTEN =====
-// Wichtig: SettingsManager muss zuerst initialisiert werden
+// Wichtig: Reihenfolge beachten
 const settingsManager = new SettingsManager();
 const vehicleManager = new VehicleManager();
+const dashboardManager = new DashboardManager();
+
+// Initial Dashboard rendern
+dashboardManager.render();

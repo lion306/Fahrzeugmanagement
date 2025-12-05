@@ -14,6 +14,15 @@
         </header>
 
         <main>
+            <!-- Dashboard -->
+            <section class="dashboard-section">
+                <h2>📊 Dashboard - Eskalationen</h2>
+                <div class="dashboard-grid" id="dashboard-grid">
+                    <!-- Kacheln werden dynamisch generiert -->
+                </div>
+                <p id="no-escalations" class="empty-message">Keine überfälligen Fahrzeuge vorhanden.</p>
+            </section>
+
             <!-- Formular zum Hinzufügen/Bearbeiten -->
             <section class="form-section">
                 <h2 id="form-title">Neues Fahrzeug anlegen</h2>
@@ -228,6 +237,7 @@
                     <button class="tab-btn" data-tab="aufbereiter">Aufbereiter</button>
                     <button class="tab-btn" data-tab="hersteller">Hersteller</button>
                     <button class="tab-btn" data-tab="herkunft">Herkunft</button>
+                    <button class="tab-btn" data-tab="eskalation">Eskalation</button>
                 </div>
 
                 <!-- Tab Content -->
@@ -266,6 +276,52 @@
                             <button class="btn btn-primary btn-add" onclick="settingsManager.addItem('herkunft')">Hinzufügen</button>
                         </div>
                         <ul class="settings-list" id="list-herkunft"></ul>
+                    </div>
+
+                    <!-- Eskalation Tab -->
+                    <div class="tab-pane" id="tab-eskalation">
+                        <p class="eskalation-info">Definieren Sie hier, nach wie vielen Tagen ein Fahrzeug als überfällig gilt und im Dashboard erscheint.</p>
+                        <form id="eskalation-form" class="eskalation-grid">
+                            <div class="eskalation-item">
+                                <label for="esk-lieferung">Lieferung überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-lieferung" min="1" max="365" value="14">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Einkaufsdatum, wenn noch nicht geliefert</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-werkstatt">Werkstatt überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-werkstatt" min="1" max="365" value="5">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Werkstatt</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-fremdfirma">Fremdfirma überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-fremdfirma" min="1" max="365" value="7">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Fremdfirma</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-aufbereitung">Aufbereitung überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-aufbereitung" min="1" max="365" value="3">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Aufbereitung</small>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Eskalationsstufen speichern</button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
