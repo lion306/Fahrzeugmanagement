@@ -10,9 +10,19 @@
     <div class="container">
         <header>
             <h1>🚗 Fahrzeugmanagement</h1>
+            <button class="btn btn-settings" id="settings-btn" title="Einstellungen">⚙️ Einstellungen</button>
         </header>
 
         <main>
+            <!-- Dashboard -->
+            <section class="dashboard-section">
+                <h2>📊 Dashboard - Eskalationen</h2>
+                <div class="dashboard-grid" id="dashboard-grid">
+                    <!-- Kacheln werden dynamisch generiert -->
+                </div>
+                <p id="no-escalations" class="empty-message">Keine überfälligen Fahrzeuge vorhanden.</p>
+            </section>
+
             <!-- Formular zum Hinzufügen/Bearbeiten -->
             <section class="form-section">
                 <h2 id="form-title">Neues Fahrzeug anlegen</h2>
@@ -32,7 +42,9 @@
 
                         <div class="form-group">
                             <label for="hersteller">Hersteller</label>
-                            <input type="text" id="hersteller" placeholder="z.B. Mercedes-Benz" required>
+                            <select id="hersteller" required>
+                                <option value="">-- Bitte wählen --</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
@@ -42,12 +54,19 @@
 
                         <div class="form-group">
                             <label for="herkunft">Herkunft</label>
-                            <input type="text" id="herkunft" placeholder="z.B. Deutschland" required>
+                            <select id="herkunft" required>
+                                <option value="">-- Bitte wählen --</option>
+                            </select>
                         </div>
 
                         <div class="form-group">
                             <label for="wa-nr">WA-Nr.</label>
                             <input type="text" id="wa-nr" placeholder="z.B. WA-2024-001" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="einkaufsdatum">Einkaufsdatum</label>
+                            <input type="date" id="einkaufsdatum" required>
                         </div>
                     </div>
 
@@ -76,6 +95,8 @@
                                 <th>Modell</th>
                                 <th>Herkunft</th>
                                 <th>WA-Nr.</th>
+                                <th>Einkaufsdatum</th>
+                                <th>Status</th>
                                 <th>Aktionen</th>
                             </tr>
                         </thead>
@@ -91,6 +112,220 @@
         <footer>
             <p>&copy; 2024 Fahrzeugmanagement</p>
         </footer>
+    </div>
+
+    <!-- Fahrzeug-Detail Modal für Tracking -->
+    <div id="vehicle-detail-modal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>📋 Fahrzeug-Details & Tracking</h2>
+                <button class="modal-close" id="detail-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Fahrzeug-Info -->
+                <div class="vehicle-info-header">
+                    <div class="info-item"><strong>GW-Nr.:</strong> <span id="detail-gw-nr"></span></div>
+                    <div class="info-item"><strong>Hersteller:</strong> <span id="detail-hersteller"></span></div>
+                    <div class="info-item"><strong>Modell:</strong> <span id="detail-modell"></span></div>
+                    <div class="info-item"><strong>Fahrgestellnr.:</strong> <span id="detail-fahrgestellnummer"></span></div>
+                </div>
+
+                <input type="hidden" id="detail-vehicle-id">
+
+                <!-- Tracking-Formular -->
+                <form id="tracking-form">
+                    <h3>Termine & Tracking</h3>
+
+                    <div class="tracking-grid">
+                        <!-- Einkauf & Lieferung -->
+                        <div class="tracking-section">
+                            <h4>Einkauf & Lieferung</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-einkaufsdatum">Einkaufsdatum</label>
+                                    <input type="date" id="detail-einkaufsdatum">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-lieferdatum">Lieferdatum</label>
+                                    <input type="date" id="detail-lieferdatum">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Werkstatt -->
+                        <div class="tracking-section">
+                            <h4>Werkstatt</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-werkstatt-uebergabe">Übergeben an Werkstatt</label>
+                                    <input type="date" id="detail-werkstatt-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-werkstatt-zurueck">Zurück von Werkstatt</label>
+                                    <input type="date" id="detail-werkstatt-zurueck">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fremdfirma -->
+                        <div class="tracking-section">
+                            <h4>Fremdfirma</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma">Fremdfirma</label>
+                                    <select id="detail-fremdfirma">
+                                        <option value="">-- Keine --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma-uebergabe">Übergeben an Fremdfirma</label>
+                                    <input type="date" id="detail-fremdfirma-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-fremdfirma-zurueck">Zurück von Fremdfirma</label>
+                                    <input type="date" id="detail-fremdfirma-zurueck">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Aufbereitung -->
+                        <div class="tracking-section">
+                            <h4>Aufbereitung</h4>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-aufbereiter">Aufbereiter</label>
+                                    <select id="detail-aufbereiter">
+                                        <option value="">-- Keine --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="tracking-row">
+                                <div class="form-group">
+                                    <label for="detail-aufbereitung-uebergabe">Übergeben an Aufbereitung</label>
+                                    <input type="date" id="detail-aufbereitung-uebergabe">
+                                </div>
+                                <div class="form-group">
+                                    <label for="detail-aufbereitung-zurueck">Zurück von Aufbereitung</label>
+                                    <input type="date" id="detail-aufbereitung-zurueck">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Tracking speichern</button>
+                        <button type="button" class="btn btn-secondary" id="detail-cancel">Schließen</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Einstellungen Modal -->
+    <div id="settings-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Einstellungen - Stammdaten</h2>
+                <button class="modal-close" id="settings-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Tab Navigation -->
+                <div class="settings-tabs">
+                    <button class="tab-btn active" data-tab="fremdfirmen">Fremdfirmen</button>
+                    <button class="tab-btn" data-tab="aufbereiter">Aufbereiter</button>
+                    <button class="tab-btn" data-tab="hersteller">Hersteller</button>
+                    <button class="tab-btn" data-tab="herkunft">Herkunft</button>
+                    <button class="tab-btn" data-tab="eskalation">Eskalation</button>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content">
+                    <!-- Fremdfirmen Tab -->
+                    <div class="tab-pane active" id="tab-fremdfirmen">
+                        <div class="add-item-form">
+                            <input type="text" id="new-fremdfirma" placeholder="Neue Fremdfirma eingeben...">
+                            <button type="button" class="btn btn-primary btn-add" onclick="settingsManager.addItem('fremdfirmen')">Hinzufügen</button>
+                        </div>
+                        <ul class="settings-list" id="list-fremdfirmen"></ul>
+                    </div>
+
+                    <!-- Aufbereiter Tab -->
+                    <div class="tab-pane" id="tab-aufbereiter">
+                        <div class="add-item-form">
+                            <input type="text" id="new-aufbereiter" placeholder="Neuen Aufbereiter eingeben...">
+                            <button type="button" class="btn btn-primary btn-add" onclick="settingsManager.addItem('aufbereiter')">Hinzufügen</button>
+                        </div>
+                        <ul class="settings-list" id="list-aufbereiter"></ul>
+                    </div>
+
+                    <!-- Hersteller Tab -->
+                    <div class="tab-pane" id="tab-hersteller">
+                        <div class="add-item-form">
+                            <input type="text" id="new-hersteller" placeholder="Neuen Hersteller eingeben...">
+                            <button type="button" class="btn btn-primary btn-add" onclick="settingsManager.addItem('hersteller')">Hinzufügen</button>
+                        </div>
+                        <ul class="settings-list" id="list-hersteller"></ul>
+                    </div>
+
+                    <!-- Herkunft Tab -->
+                    <div class="tab-pane" id="tab-herkunft">
+                        <div class="add-item-form">
+                            <input type="text" id="new-herkunft" placeholder="Neue Herkunft eingeben...">
+                            <button type="button" class="btn btn-primary btn-add" onclick="settingsManager.addItem('herkunft')">Hinzufügen</button>
+                        </div>
+                        <ul class="settings-list" id="list-herkunft"></ul>
+                    </div>
+
+                    <!-- Eskalation Tab -->
+                    <div class="tab-pane" id="tab-eskalation">
+                        <p class="eskalation-info">Definieren Sie hier, nach wie vielen Tagen ein Fahrzeug als überfällig gilt und im Dashboard erscheint.</p>
+                        <form id="eskalation-form" class="eskalation-grid">
+                            <div class="eskalation-item">
+                                <label for="esk-lieferung">Lieferung überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-lieferung" min="1" max="365" value="14">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Einkaufsdatum, wenn noch nicht geliefert</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-werkstatt">Werkstatt überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-werkstatt" min="1" max="365" value="5">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Werkstatt</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-fremdfirma">Fremdfirma überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-fremdfirma" min="1" max="365" value="7">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Fremdfirma</small>
+                            </div>
+
+                            <div class="eskalation-item">
+                                <label for="esk-aufbereitung">Aufbereitung überfällig nach</label>
+                                <div class="eskalation-input">
+                                    <input type="number" id="esk-aufbereitung" min="1" max="365" value="3">
+                                    <span>Tagen</span>
+                                </div>
+                                <small>Ab Übergabe an Aufbereitung</small>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Eskalationsstufen speichern</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>
